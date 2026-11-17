@@ -1,0 +1,16 @@
+# Configuração do aplicativo (Streamlit).
+
+[server]
+# O app não tem login, então só atende o próprio computador. Sem esta linha o
+# Streamlit atende também a rede local, e qualquer aparelho no mesmo Wi-Fi
+# poderia abrir os dados.
+address = "localhost"
+# Não pede e-mail no terminal na primeira vez que o app abre.
+showEmailPrompt = false
+
+[browser]
+# Não envia estatísticas de uso para o Streamlit.
+gatherUsageStats = false
+
+[theme]
+primaryColor = "#1F5FBF"

@@ -1,0 +1,36 @@
+# Roda os testes e a checagem de tipos a cada envio de código.
+# Usa só dados fictícios: não lê nenhum Secret e não acessa a Pluggy nem a planilha.
+name: Testes
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Instalar o projeto com as ferramentas de teste
+        run: pip install -e ".[dev,app]"
+
+      - name: Testes
+        run: pytest
+
+      - name: Checagem de tipos
+        run: mypy
+
+      - name: Modo demo de ponta a ponta
+        env:
+          DATA_MODE: demo
+        run: python -m bussola.main

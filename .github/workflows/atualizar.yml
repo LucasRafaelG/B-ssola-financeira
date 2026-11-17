@@ -1,0 +1,63 @@
+# Atualiza a planilha Bússola todo dia.
+# O log desta execução mostra só contagens e status, nunca descrições ou valores.
+name: Atualizar planilha
+
+on:
+  schedule:
+    - cron: "0 10 * * *" # 10:00 UTC = 07:00 no horário de Brasília
+  workflow_dispatch:
+    inputs:
+      dias:
+        description: "Quantos dias buscar (1 a 365). Em branco = janela normal."
+        required: false
+        type: number
+
+# O mínimo necessário: ler o código e pedir ao GitHub o token de identidade
+# que o Google confere (Workload Identity Federation). Nada de escrita no repositório.
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: atualizar-planilha
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    # Parado até as Variables do Google Cloud serem cadastradas no repositório.
+    if: ${{ vars.GCP_SERVICE_ACCOUNT != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # As ações ficam presas a um commit exato, não a uma etiqueta que pode ser movida.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Instalar o projeto
+        run: pip install .
+
+      # Login no Google sem chave (Workload Identity Federation): o Google só aceita
+      # o repositório configurado no provedor. Os valores vêm das Variables do repositório.
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Atualizar a planilha
+        env:
+          PLUGGY_CLIENT_ID: ${{ secrets.PLUGGY_CLIENT_ID }}
+          PLUGGY_CLIENT_SECRET: ${{ secrets.PLUGGY_CLIENT_SECRET }}
+          PLUGGY_ITEM_ID: ${{ secrets.PLUGGY_ITEM_ID }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          DIAS: ${{ inputs.dias }}
+          EVENTO: ${{ github.event_name }}
+        # A execução agendada respeita o interruptor "atualização automática" da planilha.
+        # A execução pelo botão "Run workflow" roda sempre.
+        run: |
+          if [ "$EVENTO" = "schedule" ]; then set -- --agendada; fi
+          python -m bussola.main "$@" ${DIAS:+--dias "$DIAS"}

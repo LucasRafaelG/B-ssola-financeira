@@ -1,0 +1,21 @@
+# Segredos: nunca vão para o GitHub
+.env
+.env.*
+!.env.example
+*.json
+credenciais/
+
+# Dados exportados (podem conter transações reais)
+dados/
+*.csv
+*.xlsx
+*.parquet
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+.pytest_cache/
+.mypy_cache/
