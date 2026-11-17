@@ -1,4 +1,4 @@
-# Bússola
+# Bússola financeira
 
 **Saiba no meio do mês se vai sobrar dinheiro no fim dele.**
 
@@ -123,6 +123,8 @@ mypy
 Os testes rodam só com dados fictícios e respostas falsas da API. Cobrem a padronização, as regras (acentos, maiúsculas, espaços, empate entre regras, linhas corrigidas à mão), a deduplicação, a projeção do mês, o resumo da semana, os lançamentos manuais, o interruptor e as quatro telas do aplicativo. O GitHub Actions roda tudo a cada envio de código.
 
 ## Usar com os seus dados
+
+O passo a passo completo, com todos os comandos (Pluggy, planilha, conta de serviço do Google, uso manual, execução diária e problemas comuns), está em [docs/configuracao.md](docs/configuracao.md). O resumo:
 
 Você vai precisar de:
 
